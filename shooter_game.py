@@ -17,14 +17,14 @@ fire_sound = mixer.Sound('fire.ogg')
 
 lost = 0
 score = 0
-font1 = font.SysFont(None, 36)
-font2 = font.SysFont(None, 80)
+font1 = font.Font(None, 36)
+font2 = font.Font(None, 80)
 monsters = sprite.Group()
 bullets = sprite.Group()
 asteroids = sprite.Group()
 clock = time.Clock()
 hp = 3
-FPS = 30
+FPS = 40
 
 rel_time = False
 
@@ -40,14 +40,6 @@ if hp == 2:
 
 if hp == 1:
     life_color = (255,0,0)
-
-
-
-
-
-
-
-
 
 
 
@@ -89,7 +81,13 @@ class Enemy(GameSprite):
             self.rect.y = 0
             self.rect.x = randint(100,600)
 
-
+class Asteroides(GameSprite):
+    def update(self):
+        self.rect.y += self.speed
+        global lost
+        if self.rect.y >= 520:
+            self.rect.y = 0
+            self.rect.x = randint(100,600)
 
 class Bullet(GameSprite):
     def update(self):
@@ -99,12 +97,12 @@ class Bullet(GameSprite):
 
 
 
-for i in range(3):
-    asteroid = Enemy('asteroid.png', randint(80,620),-20,80,50, randint(1,7))
+for i in range(2):
+    asteroid = Asteroides('asteroid.png', randint(80,620),-20,80,50, 1)
     asteroids.add(asteroid)
 
 for i in range(6):
-    monster = Enemy('ufo.png', randint(80,620),-20,80,50, randint(1,4))
+    monster = Enemy('ufo.png', randint(80,620),-20,80,50, randint(1,2))
     monsters.add(monster)
 
 player = Player('rocket.png', 350,420,80,100, 7)
@@ -117,12 +115,12 @@ while run:
             run = False 
         elif e.type == KEYDOWN:
             if e.key == K_SPACE:
-                if num_fire < 5 and rel_time == False:
+                if num_fire < 15 and rel_time == False:
                     num_fire = num_fire + 1
                     fire_sound.play()
                     player.fire()
     
-                if num_fire >= 5 and rel_time == False:
+                if num_fire >= 15 and rel_time == False:
                     last_time = timer()
                     rel_time = True 
     if not finish:
@@ -146,12 +144,12 @@ while run:
 
 
 
-        if lost == 3 or sprite.spritecollide(player,monsters,False) or hp == 0:
+        if lost == 8 or hp == 0:
             finish = True
             lose_text = font2.render('ТЫ ПРОИГРАЛ', True, (255,0,0))
             window.blit(lose_text, (170,200))
 
-        if score == 11:
+        if score == 16:
             finish = True
             win_text = font2.render('ТЫ ВЫЙГРАЛ', True, (255,0,0))
             window.blit(win_text, (170,200))
@@ -159,7 +157,11 @@ while run:
 
         if sprite.spritecollide(player, asteroids,True):
             hp -= 1
+
+        if sprite.spritecollide(player, monsters,True):
+            hp -= 1
             
+        
         
         if rel_time == True:
             now_time = timer()
